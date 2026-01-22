@@ -1,0 +1,4 @@
+==================================================================
+Creation of table by codes was not used because Bulk loading was 
+ restricted due to OS security policy; data ingested via ETL tool.
+==================================================================
