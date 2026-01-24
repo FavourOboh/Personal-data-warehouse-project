@@ -1,0 +1,57 @@
+======================================================================
+These were various steps i took to make sure the tables were cleaned up
+ enough to move to the silver table. I altered the tables that had a lot
+ of decimals and finally moved the clean tables to the silver table.
+======================================================================
+
+--Check for nulls or duplicates in the primary key
+---Expectation: No result
+
+
+SELECT
+order_id,
+COUNT(*)
+FROM bronze.[ecm_ecommerce_dataset.csv]
+GROUP BY order_id
+HAVING COUNT(*) > 1 OR order_id IS NULL
+
+--check fow unwanted spaces
+--Expectation : no result
+SELECT 
+customer_segment
+FROM bronze.[ecm_ecommerce_dataset.csv]
+WHERE customer_segment != TRIM(customer_segment)
+
+---Altering table 
+ALTER TABLE  bronze.[ecm_ecommerce_dataset.csv]
+ALTER COLUMN discount_applied INT;
+
+-- BADdata check
+SELECT discount_applied
+FROM  bronze.[ecm_ecommerce_dataset.csv]
+WHERE TRY_CAST (discount_applied AS INT) IS NULL
+
+---Rounding up
+SELECT
+ total_amount,
+ ROUND(total_amount,2) AS total_amount
+FROM bronze.[ecm_ecommerce_dataset.csv]
+
+--check if decimals are supported properly
+SELECT DATA_TYPE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'bronze.[ecm_ecommerce_dataset.csv]' 
+AND COLUMN_NAME = 'total_amount';
+
+--Alter tables
+ALTER TABLE bronze.[ecm_ecommerce_dataset.csv]
+ALTER COLUMN total_amount
+DECIMAL(12,2);
+
+ALTER TABLE bronze.[ecm_ecommerce_dataset.csv]
+ALTER COLUMN net_amount
+DECIMAL(12,2);
+
+ALTER TABLE bronze.[ecm_ecommerce_dataset.csv]
+ALTER COLUMN unit_price
+DECIMAL(12,2);
