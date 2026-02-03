@@ -55,3 +55,16 @@ DECIMAL(12,2);
 ALTER TABLE bronze.[ecm_ecommerce_dataset.csv]
 ALTER COLUMN unit_price
 DECIMAL(12,2);
+
+--Check data consistency between the price,quantity and total amount
+--Sales = Quantity*Price
+--values must not be null,zero or negative.
+
+SELECT DISTINCT 
+unit_price,
+quantity,
+total_amount
+FROM silver.ecm_ecommerce_dataset
+WHERE total_amount!= unit_price * quantity
+OR total_amount IS NULL OR quantity IS NULL OR unit_price IS NULL
+OR total_amount <= 0 OR quantity <= 0  OR unit_price <= 0 
