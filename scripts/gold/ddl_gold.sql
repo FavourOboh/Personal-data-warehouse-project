@@ -22,6 +22,7 @@ FROM silver.ecm_ecommerce_dataset
 
 CREATE OR ALTER VIEW gold.dim_products AS
 SELECT
+ROW_NUMBER() OVER(ORDER BY product_name) AS product_key,
 product_category,
 product_name,
 unit_price,
@@ -29,7 +30,7 @@ order_date,
 order_status,
 payment_method
 FROM silver.ecm_ecommerce_dataset
-  
+
 ---------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
