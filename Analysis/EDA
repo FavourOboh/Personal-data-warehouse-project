@@ -1,0 +1,60 @@
+--Find the total customers by country
+    SELECT country AS measure_name,
+    COUNT(customer_key) AS measure_value
+    FROM gold.dim_customers
+    GROUP BY country
+    ORDER BY measure_value ASC
+
+
+--Find the total products by category
+    SELECT product_category AS measure_name,
+    COUNT(product_key) AS measure_value
+    FROM gold.dim_products
+    GROUP BY product_category
+    ORDER BY measure_value ASC
+
+--What is the total revenue generated for each product
+    SELECT
+    SUM(f.net_amount) AS total_net_revenue,
+    p.product_name
+    FROM gold.fact_sales f
+    LEFT JOIN gold.dim_products p
+    ON p.product_key = f.order_id
+    GROUP BY p.product_name
+    ORDER BY total_net_revenue desc
+    
+
+--What is the total revenue generated for each category
+    SELECT
+    SUM(f.net_amount) AS total_net_revenue,
+    p.product_category
+    FROM gold.fact_sales f
+    LEFT JOIN gold.dim_products p
+    ON p.product_key = f.order_id
+    GROUP BY p.product_category
+    ORDER BY total_net_revenue desc
+
+--what is the total distrubution of sold items across countries?
+    SELECT
+    SUM(f.net_amount) AS total_sold_items,
+    c.country
+    FROM gold.fact_sales f
+    LEFT JOIN gold.dim_customers c
+    ON f.order_id = c.customer_key
+    GROUP BY c.country
+    ORDER BY total_sold_items desc
+
+--which products generate the highest revenue?
+    SELECT
+    *
+    FROM(
+    SELECT
+    SUM(f.net_amount) AS total_net_revenue,
+    p.product_name,
+    ROW_NUMBER() OVER (ORDER BY(SUM(f.net_amount) ) DESC) AS rank
+    FROM gold.fact_sales f
+    LEFT JOIN gold.dim_products p
+    ON p.product_key = f.order_id
+    GROUP BY p.product_name
+    )t
+    WHERE rank <= 5
