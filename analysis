@@ -27,3 +27,11 @@ UNION ALL
     SELECT 'total_customers' AS measure_name,
     COUNT(customer_id) AS measure_value
     FROM gold.dim_customers
+======================================================================================================
+--find the date of the first and last order
+--how many years of sales are available
+        SELECT
+        MIN(order_date) AS first_order_date,
+        MAX(order_date)  AS last_order_date,
+        DATEDIFF(MONTH,MIN(order_date),MAX(order_date)) AS month_difference
+        FROM gold.fact_sales
