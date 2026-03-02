@@ -58,3 +58,24 @@
     GROUP BY p.product_name
     )t
     WHERE rank <= 5
+
+( CUMMULATIVE ANALYSIS...
+----Running total sales per month
+        SELECT 
+        order_date,
+        total_amount,
+        SUM(total_amount) OVER (PARTITION BY order_date ORDER BY order_date) AS running_total_sales,
+        AVG(avg_price) OVER (PARTITION BY order_date ORDER BY order_date) AS moving_average
+        FROM
+        (
+        SELECT 
+        DATETRUNC(month, order_date) AS order_date,
+        SUM(net_amount) AS total_amount,
+        AVG(unit_price) AS avg_price
+        FROM gold.fact_sales
+        WHERE order_date IS NOT NULL
+        GROUP BY DATETRUNC(month, order_date) 
+        )t
+)
+
+
