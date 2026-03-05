@@ -115,3 +115,23 @@ to both the average sales performance of the product and the previous year's sal
         FROM yearly_product_sales
         ORDER BY product_name, order_year
 )
+
+
+Part-to-whole analysis
+-- Which categories contribute the most to overall sales?
+        WITH category_sales  AS (
+        SELECT
+        p.product_category,
+        SUM(f.net_amount) AS total_sales
+        FROM gold.fact_sales f
+        LEFT JOIN gold.dim_products p
+        ON f.order_id = p.product_key 
+        GROUP BY p.product_category)
+        
+        SELECT 
+        product_category,
+        total_sales,
+        SUM(total_sales) OVER() as overall_sales,
+        CONCAT(ROUND((total_sales/ SUM(total_sales) OVER()) * 100,2) ,'%')AS percentage_of_total
+        FROM category_sales
+        ORDER BY total_sales desc
