@@ -195,4 +195,51 @@ And find the total number of customers by each group
         ORDER BY total_customers
 
 
+/* Customer report
+1.) Base Query : Retrieves core columns from table
+*/
+
+CREATE VIEW gold.customer_report AS
+WITH base_query AS (
+SELECT
+c.customer_id,
+c.customer_segment,
+c.country,
+f.unit_price,
+f.quantity,
+f.discount_applied,
+f.net_amount,
+f.order_date
+FROM gold.fact_sales f
+LEFT JOIN gold.dim_customers c
+ON c.customer_key = f.order_id 
+WHERE order_date IS NOT NULL
+)
+
+,customer_aggregation AS (
+--Customer aggregations, summarizing key metrics
+SELECT
+customer_id,
+SUM(net_amount) AS total_sales,
+SUM(quantity) AS total_quantity,
+MAX(order_date) AS last_order_date,
+DATEDIFF(month,MIN(order_date),MAX(order_date)) AS lifespan
+FROM base_query
+GROUP BY customer_id
+)
+
+SELECT
+customer_id,
+total_sales,
+total_quantity,
+last_order_date,
+lifespan,
+DATEDIFF(month,last_order_date,GETDATE()) as recency,
+--compute average monthly spend
+CASE WHEN lifespan = 0 THEN total_sales
+     ELSE total_sales / lifespan
+END AS avg_monthly_spend
+FROM customer_aggregation
+
+
 
